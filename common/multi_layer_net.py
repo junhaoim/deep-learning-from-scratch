@@ -1,7 +1,8 @@
 # coding: utf-8
-import sys, os
+import os
+import sys
+
 sys.path.append(os.pardir)  # 親ディレクトリのファイルをインポートするための設定
-import numpy as np
 from collections import OrderedDict
 from common.layers import *
 from common.gradient import numerical_gradient
@@ -21,6 +22,7 @@ class MultiLayerNet:
         'sigmoid'または'xavier'を指定した場合は「Xavierの初期値」を設定
     weight_decay_lambda : Weight Decay（L2ノルム）の強さ
     """
+
     def __init__(self, input_size, hidden_size_list, output_size,
                  activation='relu', weight_init_std='relu', weight_decay_lambda=0):
         self.input_size = input_size
@@ -36,14 +38,14 @@ class MultiLayerNet:
         # レイヤの生成
         activation_layer = {'sigmoid': Sigmoid, 'relu': Relu}
         self.layers = OrderedDict()
-        for idx in range(1, self.hidden_layer_num+1):
+        for idx in range(1, self.hidden_layer_num + 1):
             self.layers['Affine' + str(idx)] = Affine(self.params['W' + str(idx)],
                                                       self.params['b' + str(idx)])
             self.layers['Activation_function' + str(idx)] = activation_layer[activation]()
 
         idx = self.hidden_layer_num + 1
         self.layers['Affine' + str(idx)] = Affine(self.params['W' + str(idx)],
-            self.params['b' + str(idx)])
+                                                  self.params['b' + str(idx)])
 
         self.last_layer = SoftmaxWithLoss()
 
@@ -64,7 +66,7 @@ class MultiLayerNet:
             elif str(weight_init_std).lower() in ('sigmoid', 'xavier'):
                 scale = np.sqrt(1.0 / all_size_list[idx - 1])  # sigmoidを使う場合に推奨される初期値
 
-            self.params['W' + str(idx)] = scale * np.random.randn(all_size_list[idx-1], all_size_list[idx])
+            self.params['W' + str(idx)] = scale * np.random.randn(all_size_list[idx - 1], all_size_list[idx])
             self.params['b' + str(idx)] = np.zeros(all_size_list[idx])
 
     def predict(self, x):
@@ -97,7 +99,7 @@ class MultiLayerNet:
     def accuracy(self, x, t):
         y = self.predict(x)
         y = np.argmax(y, axis=1)
-        if t.ndim != 1 : t = np.argmax(t, axis=1)
+        if t.ndim != 1: t = np.argmax(t, axis=1)
 
         accuracy = np.sum(y == t) / float(x.shape[0])
         return accuracy
@@ -119,7 +121,7 @@ class MultiLayerNet:
         loss_W = lambda W: self.loss(x, t)
 
         grads = {}
-        for idx in range(1, self.hidden_layer_num+2):
+        for idx in range(1, self.hidden_layer_num + 2):
             grads['W' + str(idx)] = numerical_gradient(loss_W, self.params['W' + str(idx)])
             grads['b' + str(idx)] = numerical_gradient(loss_W, self.params['b' + str(idx)])
 
@@ -153,8 +155,9 @@ class MultiLayerNet:
 
         # 設定
         grads = {}
-        for idx in range(1, self.hidden_layer_num+2):
-            grads['W' + str(idx)] = self.layers['Affine' + str(idx)].dW + self.weight_decay_lambda * self.layers['Affine' + str(idx)].W
+        for idx in range(1, self.hidden_layer_num + 2):
+            grads['W' + str(idx)] = self.layers['Affine' + str(idx)].dW + self.weight_decay_lambda * self.layers[
+                'Affine' + str(idx)].W
             grads['b' + str(idx)] = self.layers['Affine' + str(idx)].db
 
         return grads
